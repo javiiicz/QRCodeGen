@@ -5,6 +5,7 @@ class Message:
         self.plaintext = plaintext
         self.mode = ""
         self.level = level
+        self.version = 0
         self.bits = ""
     
     # Step 1: Data Analysis
@@ -29,13 +30,27 @@ class Message:
         
         raise Exception("No suitable mode found for the message.")
 
+
     # Step 2: Data Encoding
     def errorCLevel(self, level):
         if level in ["L", "M", "Q", "H"]:
             self.level = level
             
     def determineVersion(self):
-        pass
+        characters = len(self.plaintext)
+        lookup = Tables.versions
+        ECLevel = {"L": 0,"M": 1,"Q": 2,"H": 3}.get(self.level)
+        mode = {"numeric": 0, "alphanumeric": 1, "byte": 2, "kanji": 3}.get(self.mode)
+        
+        if ECLevel == None or mode == None:
+            raise Exception("Mode or Error Correction Level not determined.")
+        
+        for i in range(40):
+            if lookup[i][ECLevel][mode] >= characters:
+                self.version = i + 1
+                return
+        
+        raise Exception("String is too big, no version can fit it.")
     
 # Step 3: Error Correction
 
