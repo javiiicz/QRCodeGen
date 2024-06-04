@@ -1,9 +1,11 @@
-from charTables import Tables
+from Tables import Tables
 
 class Message:
-    def __init__(self, plaintext):
+    def __init__(self, plaintext, level = "L"):
         self.plaintext = plaintext
         self.mode = ""
+        self.level = level
+        self.bits = ""
     
     # Step 1: Data Analysis
     def analyze(self):
@@ -27,8 +29,14 @@ class Message:
         
         raise Exception("No suitable mode found for the message.")
 
-# Step 2: Data Encoding
-
+    # Step 2: Data Encoding
+    def errorCLevel(self, level):
+        if level in ["L", "M", "Q", "H"]:
+            self.level = level
+            
+    def determineVersion(self):
+        pass
+    
 # Step 3: Error Correction
 
 # Step 4: Structure Final Message
