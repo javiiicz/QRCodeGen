@@ -6,8 +6,6 @@ class Message:
         self.mode = ""
     
     # Step 1: Data Analysis
-    # Analyze the types of characters used in the message and get the best mode for encoding. 
-    # (numeric, alphanumeric, byte, kanji)
     def analyze(self):
         modes = {"numeric": 1, "alphanumeric": 1, "byte": 1, "kanji": 1}
         
