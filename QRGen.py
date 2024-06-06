@@ -20,8 +20,8 @@ class Message:
                 modes["alphanumeric"] = 0
             if char not in Tables.byte:
                 modes["byte"] = 0
-            if char not in Tables.kanji:
-                modes["kanji"] = 0
+            # if char not in Tables.kanji:    Not going to be implemented for now...
+            #     modes["kanji"] = 0
 
         for mode in modes:
             if modes[mode] == 1:
@@ -126,6 +126,18 @@ class Message:
             data += binary
 
         self.bits += data
+
+    def byte_encode(self):
+        data = ""
+        for char in self.plaintext:
+            binary = str(bin(ord(char)))[2:]
+            binary = pad_zeroes(binary, 8)
+            data += binary
+
+        self.bits = data
+
+    def kanji_encode(self):
+        raise Exception("Kanji mode not implemented.")
 
 
 # Step 3: Error Correction
