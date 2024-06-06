@@ -31,7 +31,23 @@ class Message:
         raise Exception("No suitable mode found for the message.")
 
     # Step 2: Data Encoding
-    def errorc_level(self, level):
+    def encode(self):
+        self.determine_version()
+        self.add_indicators()
+        match self.mode:
+            case "numeric":
+                self.numeric_encode()
+            case "alphanumeric":
+                self.alphanumeric_encode()
+            case "byte":
+                self.byte_encode()
+            case "kanji":
+                self.kanji_encode()
+            case _:
+                raise Exception("Mode does not exist or has not been determined.")
+        self.divide_bytes()
+
+    def set_errorc_level(self, level):
         if level in {"L", "M", "Q", "H"}:
             self.level = level
 
@@ -65,22 +81,7 @@ class Message:
             padding_lookup = 2
         mode = {"numeric": 0, "alphanumeric": 1, "byte": 2, "kanji": 3}.get(self.mode)
         count_indicator_len = Tables.padding[padding_lookup][mode]
-        self.bits += pad_zeroes(count, count_indicator_len)
-
-    def encode(self):
-        self.determine_version()
-        self.add_indicators()
-        match self.mode:
-            case "numeric":
-                self.numeric_encode()
-            case "alphanumeric":
-                self.alphanumeric_encode()
-            case "byte":
-                self.byte_encode()
-            case "kanji":
-                self.kanji_encode()
-            case _:
-                raise Exception("Mode does not exist or has not been determined.")
+        self.bits += pad_zeroes_left(count, count_indicator_len)
 
     def numeric_encode(self):
         data = ""
@@ -99,7 +100,7 @@ class Message:
                 length = 7
             else:
                 length = 4
-            binary = pad_zeroes(binary, length)
+            binary = pad_zeroes_left(binary, length)
             data += binary
 
         self.bits += data
@@ -116,13 +117,13 @@ class Message:
             if len(pair) == 1:
                 num = Tables.alphanumeric[pair]
                 binary = str(bin(num))[2:]
-                binary = pad_zeroes(binary, 6)
+                binary = pad_zeroes_left(binary, 6)
             else:
                 first = Tables.alphanumeric[pair[0]]
                 second = Tables.alphanumeric[pair[1]]
                 num = (45 * first) + second
                 binary = str(bin(num))[2:]
-                binary = pad_zeroes(binary, 11)
+                binary = pad_zeroes_left(binary, 11)
             data += binary
 
         self.bits += data
@@ -131,13 +132,39 @@ class Message:
         data = ""
         for char in self.plaintext:
             binary = str(bin(ord(char)))[2:]
-            binary = pad_zeroes(binary, 8)
+            binary = pad_zeroes_left(binary, 8)
             data += binary
 
         self.bits = data
 
     def kanji_encode(self):
         raise Exception("Kanji mode not implemented.")
+
+    def divide_bytes(self):
+        # Add Terminator
+        bits_necessary = self.determine_bits()
+        diff = bits_necessary - len(self.bits)
+        if diff > 4:
+            self.bits = pad_zeroes_right(self.bits, len(self.bits) + 4)
+        else:
+            self.bits = pad_zeroes_right(self.bits, len(self.bits) + diff)
+
+        # Make multiple of 8
+        if len(self.bits) % 8 != 0:
+            self.bits = pad_zeroes_right(self.bits, (8 - (len(self.bits) % 8)) + len(self.bits))
+
+        # Add pad bytes
+        pad_bytes = "1110110000010001"
+        pad_bytes_needed = (bits_necessary - len(self.bits)) // 8
+        if pad_bytes_needed % 2 == 0:
+            self.bits += pad_bytes * (pad_bytes_needed // 2)
+        else:
+            self.bits += pad_bytes * ((pad_bytes_needed - 1) // 2)
+            self.bits += pad_bytes[0:8]
+
+    def determine_bits(self):
+        ec_level = {"L": 0, "M": 1, "Q": 2, "H": 3}.get(self.level)
+        return 8 * Tables.codewords[self.version - 1][ec_level][0]
 
 
 # Step 3: Error Correction
@@ -151,10 +178,19 @@ class Message:
 # Step 7: Format and Version Information
 
 
-def pad_zeroes(string, length):
+def pad_zeroes_left(string, length):
     if length <= len(string):
         return string
 
     padding = (length - len(string)) * "0"
     string = padding + string
+    return string
+
+
+def pad_zeroes_right(string, length):
+    if length <= len(string):
+        return string
+
+    padding = (length - len(string)) * "0"
+    string = string + padding
     return string
