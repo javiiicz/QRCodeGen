@@ -66,9 +66,43 @@ class Message:
             padding_lookup = 2
         mode = {"numeric": 0, "alphanumeric": 1, "byte": 2, "kanji": 3}.get(self.mode)
         count_indicator_len = Tables.padding[padding_lookup][mode]
-        padding = (count_indicator_len - len(count)) * "0"
-        indicator = padding + count
-        self.bits += indicator
+        self.bits += pad_zeroes(count, count_indicator_len)
+
+    def encode(self):
+        self.determine_version()
+        self.add_indicators()
+        if self.mode == "numeric":
+            self.numeric_encode()
+        elif self.mode == "alphanumeric":
+            self.alphanumeric_encode()
+        elif self.mode == "byte":
+            self.byte_encode()
+        elif self.mode == "kanji":
+            self.kanji_encode()
+        else:
+            raise Exception("Mode does not exist or has not been determined.")
+
+    def numeric_encode(self):
+        data = ""
+        # Separate in groups of 3
+        groups = []
+        for i in range(0, len(self.plaintext), 3):
+            groups.append(self.plaintext[i:i+3])
+
+        # Convert to binary
+        for i in range(len(groups)):
+            num = int(groups[i])
+            binary = str(bin(num))[2:]
+            if num > 99:
+                length = 10
+            elif num > 9:
+                length = 7
+            else:
+                length = 4
+            binary = pad_zeroes(binary, length)
+            data += binary
+
+        self.bits += data
 
 # Step 3: Error Correction
 
@@ -79,3 +113,12 @@ class Message:
 # Step 6: Data Masking
 
 # Step 7: Format and Version Information
+
+
+def pad_zeroes(string, length):
+    if length <= len(string):
+        return string
+
+    padding = (length - len(string)) * "0"
+    string = padding + string
+    return string
