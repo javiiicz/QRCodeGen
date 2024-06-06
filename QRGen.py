@@ -71,16 +71,17 @@ class Message:
     def encode(self):
         self.determine_version()
         self.add_indicators()
-        if self.mode == "numeric":
-            self.numeric_encode()
-        elif self.mode == "alphanumeric":
-            self.alphanumeric_encode()
-        elif self.mode == "byte":
-            self.byte_encode()
-        elif self.mode == "kanji":
-            self.kanji_encode()
-        else:
-            raise Exception("Mode does not exist or has not been determined.")
+        match self.mode:
+            case "numeric":
+                self.numeric_encode()
+            case "alphanumeric":
+                self.alphanumeric_encode()
+            case "byte":
+                self.byte_encode()
+            case "kanji":
+                self.kanji_encode()
+            case _:
+                raise Exception("Mode does not exist or has not been determined.")
 
     def numeric_encode(self):
         data = ""
