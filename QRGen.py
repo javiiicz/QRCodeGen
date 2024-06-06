@@ -31,11 +31,11 @@ class Message:
         raise Exception("No suitable mode found for the message.")
 
     # Step 2: Data Encoding
-    def errorCLevel(self, level):
-        if level in ["L", "M", "Q", "H"]:
+    def errorc_level(self, level):
+        if level in {"L", "M", "Q", "H"}:
             self.level = level
             
-    def determineVersion(self):
+    def determine_version(self):
         characters = len(self.plaintext)
         lookup = Tables.versions
         ecLevel = {"L": 0, "M": 1, "Q": 2, "H": 3}.get(self.level)
@@ -51,6 +51,14 @@ class Message:
         
         raise Exception("String is too big, no version can fit it.")
     
+    def encode(self):
+        # Mode Indicator
+        indicator = {"numeric": "0001", "alphanumeric": "0010", "byte": "0100", "kanji": "1000"}
+        self.bits += indicator[self.mode]
+
+        # Character Count Indicator
+
+
 # Step 3: Error Correction
 
 # Step 4: Structure Final Message
