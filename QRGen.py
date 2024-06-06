@@ -36,7 +36,6 @@ class Message:
             self.level = level
 
     def determine_version(self):
-        characters = len(self.plaintext)
         lookup = Tables.versions
         ec_level = {"L": 0, "M": 1, "Q": 2, "H": 3}.get(self.level)
         mode = {"numeric": 0, "alphanumeric": 1, "byte": 2, "kanji": 3}.get(self.mode)
@@ -45,7 +44,7 @@ class Message:
             raise Exception("Mode or Error Correction Level not determined.")
 
         for i in range(40):
-            if lookup[i][ec_level][mode] >= characters:
+            if lookup[i][ec_level][mode] >= len(self.plaintext):
                 self.version = i + 1
                 return
 
@@ -91,8 +90,8 @@ class Message:
             groups.append(self.plaintext[i:i+3])
 
         # Convert to binary
-        for i in range(len(groups)):
-            num = int(groups[i])
+        for trio in groups:
+            num = int(trio)
             binary = str(bin(num))[2:]
             if num > 99:
                 length = 10
@@ -104,6 +103,30 @@ class Message:
             data += binary
 
         self.bits += data
+
+    def alphanumeric_encode(self):
+        data = ""
+        # Separate in groups of 2
+        groups = []
+        for i in range(0, len(self.plaintext), 2):
+            groups.append(self.plaintext[i:i+2])
+
+        # Covnert to binary
+        for pair in groups:
+            if len(pair) == 1:
+                num = Tables.alphanumeric[pair]
+                binary = str(bin(num))[2:]
+                binary = pad_zeroes(binary, 6)
+            else:
+                first = Tables.alphanumeric[pair[0]]
+                second = Tables.alphanumeric[pair[1]]
+                num = (45 * first) + second
+                binary = str(bin(num))[2:]
+                binary = pad_zeroes(binary, 11)
+            data += binary
+
+        self.bits += data
+
 
 # Step 3: Error Correction
 
