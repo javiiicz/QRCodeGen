@@ -1,4 +1,5 @@
 from Tables import Tables
+from Polynomials import Polynomial
 
 
 class Message:
@@ -169,6 +170,10 @@ class Message:
     #
     # Step 3: Error Correction
     #
+    def generate_ec_codewords(self):
+        blocks = self.break_into_blocks()
+        self.get_division_remainder(blocks)
+
     def break_into_blocks(self):
         segments = {"g1": [], "g2": []}
         ec_level = {"L": 0, "M": 1, "Q": 2, "H": 3}.get(self.level)
@@ -184,7 +189,30 @@ class Message:
         if blocks_g2 != 0:
             segments["g2"] = splice(self.bits[codewords_g1 * 8:], codewords_per_block_g2 * 8)
 
-        print(blocks_g1, codewords_per_block_g1, segments)
+        return segments
+
+    def get_division_remainder(self, blocks):
+        ec_level = {"L": 0, "M": 1, "Q": 2, "H": 3}.get(self.level)
+        ec_per_block = Tables.codewords[self.version - 1][ec_level][1]
+        for block in blocks["g1"]:
+            message_p = splice(block, 8)
+            for i, byte in enumerate(message_p):
+                # Convert to integer value, then to alpha notation
+                num = eval("0b" + byte)
+                message_p[i] = Tables.log[num]
+
+            gen_p = Tables.gen_p[ec_per_block]
+
+            # Expand message polynomial
+            message_p += [None] * ec_per_block
+
+            message_p = Polynomial(message_p)
+            gen_p = Polynomial(gen_p)
+
+            # Recall Message Polynomial is order codewords_per_block + ec_codewords
+            # Generator polynomial is order ec_codewords
+            message_p.gf256_divide_by(gen_p)
+
 
 
 # Step 4: Structure Final Message

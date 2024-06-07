@@ -7,6 +7,8 @@ class Polynomial:
         self.coef = c
 
     def gf256_mult_with(self, poly2):
+        # Input -> Polynomial obj in alpha notation
+        # Output -> Polynomial obj in alpha nontation
         p1 = self.coef
         p2 = poly2.coef
         p1, p2 = make_same_length(p1, p2)
@@ -40,7 +42,19 @@ class Polynomial:
                 continue
             res.append(n)
     
-        return res
+        return Polynomial(res)
+
+    def gf256_divide_by(self, poly):
+        # Input -> 1 Polynomial obj in alpha notation
+        # Output -> coefficients of remainder of division in int notation
+        dividend = self.coef
+        divisor = poly.coef
+        k = len(dividend) - len(divisor) + 1
+
+        for _ in range(k):
+            dividend = divide_once(dividend, divisor.copy())
+
+        return to_int(dividend)
 
 
 def make_same_length(p1, p2):
@@ -63,7 +77,55 @@ def generate_n_generator_polynomials(n):
         new = ps[len(ps) - 1].gf256_mult_with(poly2)
         ps.append(Polynomial(new))
     return ps
-        
+
+
+def divide_once(dividend, divisor):
+    # input -> 2 coefficient lists | alpha notation
+    # output -> coef of remainder from one division in alpha notation
+    assert len(divisor) <= len(dividend)
+
+    factor = dividend[0]
+
+    # Multiply factor and convert to int
+    for i, c in enumerate(divisor):
+        e  = c + factor
+        e = e % 255
+        divisor[i] = Tables.antilog[e]
+
+    dividend = to_int(dividend)
+
+    # Expand divisor coeff
+    divisor += [0] * (len(dividend) - len(divisor))
+
+    # XOR result with message polynomial
+    for i, c in enumerate(dividend):
+        d1 = divisor[i]
+        d2 = c
+        dividend[i] = d1 ^ d2
+
+    # Discard first (will always be 0)
+    dividend = dividend[1:]
+
+    dividend = to_exp(dividend)
+
+    return dividend
+
+
+def to_int(coef):
+    for i, c in enumerate(coef):
+        if c is None:
+            coef[i] = 0
+            continue
+        coef[i] = Tables.antilog[c]
+    return coef
+
+
+def to_exp(coef):
+    for i, c in enumerate(coef):
+        coef[i] = Tables.log[c]
+    return coef
+
+
 if __name__ == "__main__":
     res = [None]
     for p in generate_n_generator_polynomials(30):
