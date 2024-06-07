@@ -45,7 +45,7 @@ class Message:
                 self.kanji_encode()
             case _:
                 raise Exception("Mode does not exist or has not been determined.")
-        self.divide_bytes()
+        self.align_bytes()
 
     def set_errorc_level(self, level):
         if level in {"L", "M", "Q", "H"}:
@@ -140,7 +140,7 @@ class Message:
     def kanji_encode(self):
         raise Exception("Kanji mode not implemented.")
 
-    def divide_bytes(self):
+    def align_bytes(self):
         # Add Terminator
         bits_necessary = self.determine_bits()
         diff = bits_necessary - len(self.bits)
