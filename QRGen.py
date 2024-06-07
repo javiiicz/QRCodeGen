@@ -9,7 +9,9 @@ class Message:
         self.version = 0
         self.bits = ""
 
+    #
     # Step 1: Data Analysis
+    #
     def analyze(self):
         modes = {"numeric": 1, "alphanumeric": 1, "byte": 1, "kanji": 1}
 
@@ -30,7 +32,9 @@ class Message:
 
         raise Exception("No suitable mode found for the message.")
 
+    #
     # Step 2: Data Encoding
+    #
     def encode(self):
         self.determine_version()
         self.add_indicators()
@@ -86,9 +90,7 @@ class Message:
     def numeric_encode(self):
         data = ""
         # Separate in groups of 3
-        groups = []
-        for i in range(0, len(self.plaintext), 3):
-            groups.append(self.plaintext[i:i+3])
+        groups = splice(self.plaintext, 3)
 
         # Convert to binary
         for trio in groups:
@@ -108,9 +110,7 @@ class Message:
     def alphanumeric_encode(self):
         data = ""
         # Separate in groups of 2
-        groups = []
-        for i in range(0, len(self.plaintext), 2):
-            groups.append(self.plaintext[i:i+2])
+        groups = splice(self.plaintext, 2)
 
         # Covnert to binary
         for pair in groups:
@@ -166,8 +166,26 @@ class Message:
         ec_level = {"L": 0, "M": 1, "Q": 2, "H": 3}.get(self.level)
         return 8 * Tables.codewords[self.version - 1][ec_level][0]
 
+    #
+    # Step 3: Error Correction
+    #
+    def break_into_blocks(self):
+        segments = {"g1": [], "g2": []}
+        ec_level = {"L": 0, "M": 1, "Q": 2, "H": 3}.get(self.level)
 
-# Step 3: Error Correction
+        blocks_g1 = Tables.codewords[self.version - 1][ec_level][2]
+        codewords_per_block_g1 = Tables.codewords[self.version - 1][ec_level][3]
+        codewords_g1 = codewords_per_block_g1 * blocks_g1
+
+        blocks_g2 = Tables.codewords[self.version - 1][ec_level][4]
+        codewords_per_block_g2 = Tables.codewords[self.version - 1][ec_level][5]
+
+        segments["g1"] = splice(self.bits[:codewords_g1 * 8], codewords_per_block_g1 * 8)
+        if blocks_g2 != 0:
+            segments["g2"] = splice(self.bits[codewords_g1 * 8:], codewords_per_block_g2 * 8)
+
+        print(blocks_g1, codewords_per_block_g1, segments)
+
 
 # Step 4: Structure Final Message
 
@@ -194,3 +212,11 @@ def pad_zeroes_right(string, length):
     padding = (length - len(string)) * "0"
     string = string + padding
     return string
+
+
+# Separate in groups of k
+def splice(string, k):
+    groups = []
+    for i in range(0, len(string), k):
+        groups.append(string[i:i+k])
+    return groups
