@@ -1,5 +1,5 @@
 from Tables import Tables
-from Polynomials import Polynomial
+from Polynomials import Polynomial, to_exp
 
 
 class Message:
@@ -9,6 +9,8 @@ class Message:
         self.level = level
         self.version = 0
         self.bits = ""
+        self.blocks = None
+        self.ec_codewords = None
 
     #
     # Step 1: Data Analysis
@@ -171,8 +173,8 @@ class Message:
     # Step 3: Error Correction
     #
     def generate_ec_codewords(self):
-        blocks = self.break_into_blocks()
-        self.get_division_remainder(blocks)
+        self.blocks = self.break_into_blocks()
+        self.ec_codewords = self.get_division_remainder(self.blocks)
 
     def break_into_blocks(self):
         segments = {"g1": [], "g2": []}
@@ -189,29 +191,41 @@ class Message:
         if blocks_g2 != 0:
             segments["g2"] = splice(self.bits[codewords_g1 * 8:], codewords_per_block_g2 * 8)
 
+        for group in segments:
+            for i, block in enumerate(segments[group]):
+                ints = splice(block, 8)
+
+                for j, byte in enumerate(ints):
+                    # Convert to integer value
+                    ints[j] = eval("0b" + byte)
+
+                segments[group][i] = ints
+
         return segments
 
     def get_division_remainder(self, blocks):
         ec_level = {"L": 0, "M": 1, "Q": 2, "H": 3}.get(self.level)
         ec_per_block = Tables.codewords[self.version - 1][ec_level][1]
-        for block in blocks["g1"]:
-            message_p = splice(block, 8)
-            for i, byte in enumerate(message_p):
-                # Convert to integer value, then to alpha notation
-                num = eval("0b" + byte)
-                message_p[i] = Tables.log[num]
+        ec_codewords = {"g1": [], "g2": []}
 
-            gen_p = Tables.gen_p[ec_per_block]
+        for group in blocks:
+            for block in blocks[group]:
+                # Alpha notation
+                message_p = to_exp(block.copy())
+                gen_p = Tables.gen_p[ec_per_block]
 
-            # Expand message polynomial
-            message_p += [None] * ec_per_block
+                # Expand message polynomial
+                message_p += [None] * ec_per_block
 
-            message_p = Polynomial(message_p)
-            gen_p = Polynomial(gen_p)
+                message_p = Polynomial(message_p)
+                gen_p = Polynomial(gen_p)
 
-            # Recall Message Polynomial is order codewords_per_block + ec_codewords
-            # Generator polynomial is order ec_codewords
-            message_p.gf256_divide_by(gen_p)
+                # Recall Message Polynomial is degree codewords_per_block + ec_codewords
+                # Generator polynomial is degree ec_codewords
+                ec_codewords[group].append(message_p.gf256_divide_by(gen_p))
+
+        return ec_codewords
+
 
 
 

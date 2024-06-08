@@ -85,6 +85,8 @@ def divide_once(dividend, divisor):
     assert len(divisor) <= len(dividend)
 
     factor = dividend[0]
+    if factor is None:
+        return dividend[1:]
 
     # Multiply factor and convert to int
     for i, c in enumerate(divisor):
