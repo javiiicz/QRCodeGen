@@ -11,6 +11,7 @@ class Message:
         self.bits = ""
         self.blocks = None
         self.ec_codewords = None
+        self.final = []
 
     #
     # Step 1: Data Analysis
@@ -226,10 +227,20 @@ class Message:
 
         return ec_codewords
 
+    #
+    # Step 4: Structure Final Message
+    #
+    def strucutre_message(self):
+        self.final += loop(self.blocks)
+        self.final += loop(self.ec_codewords)
 
+        # Binary Conversion
+        self.bits = ""
+        for n in self.final:
+            binary = bin(n)
+            binary = str(binary)[2:]
+            self.bits += binary
 
-
-# Step 4: Structure Final Message
 
 # Step 5: Module Placement in Matrix
 
@@ -262,3 +273,19 @@ def splice(string, k):
     for i in range(0, len(string), k):
         groups.append(string[i:i+k])
     return groups
+
+
+# Interleave numbers
+def loop(codewords):
+    res = []
+    max_i = max(len(codewords["g1"][0]), len(codewords["g2"][0]))
+
+    for i in range(max_i):
+        for group in codewords:
+            for block in codewords[group]:
+                if i >= len(block):
+                    continue
+
+                res.append(block[i])
+
+    return res
