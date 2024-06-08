@@ -241,6 +241,14 @@ class Message:
             binary = str(binary)[2:]
             self.bits += binary
 
+        # Add Remainder bits in required
+        if self.version in range(2, 7):
+            self.bits = pad_zeroes_right(self.bits, len(self.bits) + 7)
+        elif (self.version in range(14, 21)) or (self.version in range(28, 35)):
+            self.bits = pad_zeroes_right(self.bits, len(self.bits) + 3)
+        elif self.version in range(21, 28):
+            self.bits = pad_zeroes_right(self.bits, len(self.bits) + 4)
+
 
 # Step 5: Module Placement in Matrix
 
@@ -278,7 +286,10 @@ def splice(string, k):
 # Interleave numbers
 def loop(codewords):
     res = []
-    max_i = max(len(codewords["g1"][0]), len(codewords["g2"][0]))
+    if len(codewords["g2"]):
+        max_i = max(len(codewords["g1"][0]), len(codewords["g2"][0]))
+    else:
+        max_i = len(codewords["g1"][0])
 
     for i in range(max_i):
         for group in codewords:
