@@ -259,6 +259,7 @@ class Message:
         self.create_matrix()
         self.add_finder_patterns()  # and separators
         self.add_alignment_patterns()
+        self.add_timing_patterns()
 
     def create_matrix(self):
         self.size = ((self.version - 1) * 4) + 21
@@ -305,6 +306,20 @@ class Message:
         for i, r in enumerate(pattern):
             for j, c in enumerate(r):
                 self.matrix[row + i][col + j] = pattern[i][j]
+
+    def add_timing_patterns(self):
+        bw = 1
+        for i in range(8, self.size - 8):
+            if bw:
+                module = 1
+                bw = 0
+            else:
+                module = 0
+                bw = 1
+
+            self.matrix[6][i] = module
+            self.matrix[i][6] = module
+
 
 
 # Step 6: Data Masking
