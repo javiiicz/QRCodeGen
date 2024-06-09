@@ -273,10 +273,7 @@ class Message:
         coords = {0: (0, 0), 1: (0, self.size - 8), 2: (self.size - 8, 0)}
         pattern = Patterns.finders[kind]
         row, col = coords[kind]
-
-        for i, r in enumerate(pattern):
-            for j, c in enumerate(r):
-                self.matrix[row + i][col + j] = pattern[i][j]
+        self.place_pattern(pattern, row, col)
 
     def add_alignment_patterns(self):
         coords = Tables.locations[self.version - 1]
@@ -301,9 +298,10 @@ class Message:
     def place_alignment(self, row, col):
         # Convert to corner
         row, col = row - 2, col - 2
-
         pattern = Patterns.alignment
+        self.place_pattern(pattern, row, col)
 
+    def place_pattern(self, pattern, row, col):
         for i, r in enumerate(pattern):
             for j, c in enumerate(r):
                 self.matrix[row + i][col + j] = pattern[i][j]
