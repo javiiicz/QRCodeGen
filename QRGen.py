@@ -12,6 +12,7 @@ class Message:
         self.blocks = None
         self.ec_codewords = None
         self.final = []
+        self.matrix = []
 
     #
     # Step 1: Data Analysis
@@ -249,8 +250,15 @@ class Message:
         elif self.version in range(21, 28):
             self.bits = pad_zeroes_right(self.bits, len(self.bits) + 4)
 
+    #
+    # Step 5: Module Placement in Matrix
+    #
+    def create_matrix(self):
+        size = ((self.version - 1) * 4) + 21
+        self.matrix = [[]] * size
+        for i, row in enumerate(self.matrix):
+            self.matrix[i] = [0] * size
 
-# Step 5: Module Placement in Matrix
 
 # Step 6: Data Masking
 
