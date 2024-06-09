@@ -1,5 +1,6 @@
 from Tables import Tables
 from Polynomials import Polynomial, to_exp
+from Patterns import Patterns
 
 
 class Message:
@@ -12,6 +13,7 @@ class Message:
         self.blocks = None
         self.ec_codewords = None
         self.final = []
+        self.size = 0
         self.matrix = []
 
     #
@@ -253,11 +255,27 @@ class Message:
     #
     # Step 5: Module Placement in Matrix
     #
+    def module_placement(self):
+        self.create_matrix()
+        self.add_finder_patterns()
+
     def create_matrix(self):
-        size = ((self.version - 1) * 4) + 21
-        self.matrix = [[]] * size
-        for i, row in enumerate(self.matrix):
-            self.matrix[i] = [0] * size
+        self.size = ((self.version - 1) * 4) + 21
+        self.matrix = [[None for _ in range(self.size)] for _ in range(self.size)]
+
+    def add_finder_patterns(self):
+        self.add_finder(0)
+        self.add_finder(1)
+        self.add_finder(2)
+
+    def add_finder(self, kind):
+        coords = {0: (0, 0), 1: (0, self.size - 8), 2: (self.size - 8, 0)}
+        pattern = Patterns.finders[kind]
+        row, col = coords[kind]
+
+        for i, r in enumerate(pattern):
+            for j, c in enumerate(r):
+                self.matrix[row + i][col + j] = pattern[i][j]
 
 
 # Step 6: Data Masking
@@ -287,7 +305,7 @@ def pad_zeroes_right(string, length):
 def splice(string, k):
     groups = []
     for i in range(0, len(string), k):
-        groups.append(string[i:i+k])
+        groups.append(string[i:i + k])
     return groups
 
 
@@ -308,3 +326,15 @@ def loop(codewords):
                 res.append(block[i])
 
     return res
+
+
+def format_print_qr(matrix):
+    for row in matrix:
+        for col in row:
+            if col is None:
+                print("_", end="")
+            elif col == 1:
+                print("■", end="")
+            else:
+                print("□", end="")
+        print("")
