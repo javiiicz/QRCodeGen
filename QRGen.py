@@ -257,21 +257,52 @@ class Message:
     #
     def module_placement(self):
         self.create_matrix()
-        self.add_finder_patterns()
+        self.add_finder_patterns()  # and separators
+        self.add_alignment_patterns()
 
     def create_matrix(self):
         self.size = ((self.version - 1) * 4) + 21
         self.matrix = [[None for _ in range(self.size)] for _ in range(self.size)]
 
     def add_finder_patterns(self):
-        self.add_finder(0)
-        self.add_finder(1)
-        self.add_finder(2)
+        self.place_finder(0)
+        self.place_finder(1)
+        self.place_finder(2)
 
-    def add_finder(self, kind):
+    def place_finder(self, kind):
         coords = {0: (0, 0), 1: (0, self.size - 8), 2: (self.size - 8, 0)}
         pattern = Patterns.finders[kind]
         row, col = coords[kind]
+
+        for i, r in enumerate(pattern):
+            for j, c in enumerate(r):
+                self.matrix[row + i][col + j] = pattern[i][j]
+
+    def add_alignment_patterns(self):
+        coords = Tables.locations[self.version - 1]
+
+        if coords is None:
+            return
+
+        pairs = get_pairs(coords)
+        good_pairs = []
+        for i, pair in enumerate(pairs):
+            if pair[0] <= 8 and pair[1] <= 8:
+                continue
+            elif pair[0] <= 8 and pair[1] >= (self.size - 8):
+                continue
+            elif pair[0] >= (self.size - 8) and pair[1] <= 8:
+                continue
+            good_pairs.append(pair)
+
+        for pair in good_pairs:
+            self.place_alignment(pair[0], pair[1])
+
+    def place_alignment(self, row, col):
+        # Convert to corner
+        row, col = row - 2, col - 2
+
+        pattern = Patterns.alignment
 
         for i, r in enumerate(pattern):
             for j, c in enumerate(r):
@@ -328,13 +359,28 @@ def loop(codewords):
     return res
 
 
+# Make all possible pairs (with repeats) from given list
+def get_pairs(nums):
+    pair_num = len(nums) ** 2
+    res = [[] for _ in range(pair_num)]
+
+    for i, num1 in enumerate(nums):
+        for j in range(len(nums)):
+            res[(i * len(nums)) + j].append(num1)
+
+    for i in range(len(res)):
+        res[i].append(nums[i % len(nums)])
+
+    return res
+
+
 def format_print_qr(matrix):
     for row in matrix:
         for col in row:
             if col is None:
                 print("_", end="")
             elif col == 1:
-                print("■", end="")
-            else:
                 print("□", end="")
+            else:
+                print("■", end="")
         print("")
