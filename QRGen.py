@@ -260,6 +260,7 @@ class Message:
         self.add_finder_patterns()  # and separators
         self.add_alignment_patterns()
         self.add_timing_patterns()
+        self.add_reserved_areas()  # and dark spot
 
     def create_matrix(self):
         self.size = ((self.version - 1) * 4) + 21
@@ -320,6 +321,28 @@ class Message:
             self.matrix[6][i] = module
             self.matrix[i][6] = module
 
+    def add_reserved_areas(self):
+        # Dark spot
+        self.matrix[(4 * self.version) + 9][8] = 1
+
+        # Format information
+        for i in range(0, self.size):
+            if i <= 8 or i >= self.size - 8:
+                if self.matrix[8][i] is None:
+                    self.matrix[8][i] = 2
+                if self.matrix[i][8] is None:
+                    self.matrix[i][8] = 2
+
+        # Version information
+        if self.version >= 7:
+            for i in range(0, 6):
+                l = self.size - 9
+                self.matrix[i][l] = 2
+                self.matrix[i][l - 1] = 2
+                self.matrix[i][l - 2] = 2
+                self.matrix[l][i] = 2
+                self.matrix[l - 1][i] = 2
+                self.matrix[l - 2][i] = 2
 
 
 # Step 6: Data Masking
@@ -394,6 +417,8 @@ def format_print_qr(matrix):
                 print("_", end="")
             elif col == 1:
                 print("□", end="")
+            elif col == 2:
+                print("r", end="")
             else:
                 print("■", end="")
         print("")
