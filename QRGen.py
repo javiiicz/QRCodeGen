@@ -553,4 +553,5 @@ class Message:
             for j in range(side):
                 pixels[j, i] = self.matrix[i][j] ^ 1
         
+        image = image.resize((1024, 1024), Image.LANCZOS)
         image.save("images/" + self.filename)
