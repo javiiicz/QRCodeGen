@@ -3,6 +3,7 @@ from Polynomials import Polynomial, to_exp
 from Patterns import Patterns
 from Helpers import *
 from copy import deepcopy
+from PIL import Image
 
 
 class Message:
@@ -27,6 +28,7 @@ class Message:
         self.module_placement()
         self.mask_data()
         self.finalize_code()
+        self.create_image()
         format_print_qr(self.matrix)
 
     #
@@ -534,3 +536,20 @@ class Message:
             for j in range(self.size):
                 matrix[i + 4][j + 4] = self.matrix[i][j]
         self.matrix = matrix
+        
+    
+    #
+    # 8: Create Image File
+    #
+    def create_image(self):
+        side = self.size + 8
+        image = Image.new('1', (side, side))
+        
+        pixels = image.load()
+        
+        for i in range(side):
+            for j in range(side):
+                pixels[j, i] = self.matrix[i][j] ^ 1
+        
+        image.show()
+        image.save("examples/code.png")
