@@ -1,6 +1,7 @@
 from Tables import Tables
 from Polynomials import Polynomial, to_exp
 from Patterns import Patterns
+from Helpers import *
 from copy import deepcopy
 
 
@@ -498,83 +499,4 @@ class Message:
 
         return m
 
-
-
-
-
-
 # Step 7: Format and Version Information
-
-
-def pad_zeroes_left(string, length):
-    if length <= len(string):
-        return string
-
-    padding = (length - len(string)) * "0"
-    string = padding + string
-    return string
-
-
-def pad_zeroes_right(string, length):
-    if length <= len(string):
-        return string
-
-    padding = (length - len(string)) * "0"
-    string = string + padding
-    return string
-
-
-# Separate in groups of k
-def splice(string, k):
-    groups = []
-    for i in range(0, len(string), k):
-        groups.append(string[i:i + k])
-    return groups
-
-
-# Interleave numbers
-def loop(codewords):
-    res = []
-    if len(codewords["g2"]):
-        max_i = max(len(codewords["g1"][0]), len(codewords["g2"][0]))
-    else:
-        max_i = len(codewords["g1"][0])
-
-    for i in range(max_i):
-        for group in codewords:
-            for block in codewords[group]:
-                if i >= len(block):
-                    continue
-
-                res.append(block[i])
-
-    return res
-
-
-# Make all possible pairs (with repeats) from given list
-def get_pairs(nums):
-    pair_num = len(nums) ** 2
-    res = [[] for _ in range(pair_num)]
-
-    for i, num1 in enumerate(nums):
-        for j in range(len(nums)):
-            res[(i * len(nums)) + j].append(num1)
-
-    for i in range(len(res)):
-        res[i].append(nums[i % len(nums)])
-
-    return res
-
-
-def format_print_qr(matrix):
-    for row in matrix:
-        for col in row:
-            if col is None:
-                print("_", end="")
-            elif col == 1:
-                print("□", end="")
-            elif col == 2:
-                print("r", end="")
-            else:
-                print("■", end="")
-        print("")
