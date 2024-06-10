@@ -18,6 +18,16 @@ class Message:
         self.size = 0
         self.matrix = []
         self.data_matrix = []
+    
+    def create_qr_code(self):
+        self.analyze()
+        self.encode()
+        self.generate_ec_codewords()
+        self.strucutre_message()
+        self.module_placement()
+        self.mask_data()
+        self.finalize_code()
+        format_print_qr(self.matrix)
 
     #
     # Step 1: Data Analysis
@@ -145,7 +155,7 @@ class Message:
             binary = pad_zeroes_left(binary, 8)
             data += binary
 
-        self.bits = data
+        self.bits += data
 
     def kanji_encode(self):
         raise Exception("Kanji mode not implemented.")
@@ -504,16 +514,17 @@ class Message:
         # Version string
         if self.version >= 7:
             version_string = Tables.version_strings[self.version - 7]
+            version_string = version_string[::-1]
 
             for i in range(0, 6):
                 end = self.size - 9
-                m[i][end - 2] = version_string[i // 3]
-                m[i][end - 1] = version_string[(i // 3) + 1]
-                m[i][end] = version_string[(i // 3) + 2]
+                m[i][end - 2] = int(version_string[3 * i])
+                m[i][end - 1] = int(version_string[(3 * i) + 1])
+                m[i][end] = int(version_string[(3 * i) + 2])
 
-                m[end - 2][i] = version_string[i // 3]
-                m[end - 1][i] = version_string[(i // 3) + 1]
-                m[end][i] = version_string[(i // 3) + 2]
+                m[end - 2][i] = int(version_string[3 * i])
+                m[end - 1][i] = int(version_string[(3 * i) + 1])
+                m[end][i] = int(version_string[(3 * i) + 2])
 
         return m
 

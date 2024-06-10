@@ -168,7 +168,7 @@ def format_print_qr(matrix):
             if col is None:
                 print("_", end="")
             elif col == 1:
-                print("⬛ ", end="")
+                print("  ", end="")
             elif col == 2:
                 print("r", end="")
             else:
