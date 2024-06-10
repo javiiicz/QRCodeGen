@@ -242,6 +242,7 @@ class Message:
         for n in self.final:
             binary = bin(n)
             binary = str(binary)[2:]
+            binary = pad_zeroes_left(binary, 8)
             self.bits += binary
 
         # Add Remainder bits in required
@@ -261,6 +262,7 @@ class Message:
         self.add_alignment_patterns()
         self.add_timing_patterns()
         self.add_reserved_areas()  # and dark spot
+        self.add_data()
 
     def create_matrix(self):
         self.size = ((self.version - 1) * 4) + 21
@@ -336,13 +338,56 @@ class Message:
         # Version information
         if self.version >= 7:
             for i in range(0, 6):
-                l = self.size - 9
-                self.matrix[i][l] = 2
-                self.matrix[i][l - 1] = 2
-                self.matrix[i][l - 2] = 2
-                self.matrix[l][i] = 2
-                self.matrix[l - 1][i] = 2
-                self.matrix[l - 2][i] = 2
+                end = self.size - 9
+                self.matrix[i][end] = 2
+                self.matrix[i][end - 1] = 2
+                self.matrix[i][end - 2] = 2
+                self.matrix[end][i] = 2
+                self.matrix[end - 1][i] = 2
+                self.matrix[end - 2][i] = 2
+
+    def add_data(self):
+        bits = self.bits
+        up_direction = True
+        last = 0  # 0: vert, 1: hor
+        start = self.size - 1, self.size - 1
+
+        i, j = start
+        for bit in bits:
+            while self.matrix[i][j] is not None:
+                i, j, last, up_direction = self.find_next(i, j, last, up_direction)
+            self.matrix[i][j] = int(bit)
+
+    def find_next(self, row, col, last, up_direction):
+        if up_direction:
+            if last == 0:
+                row, col = row, col - 1
+                last = 1
+            elif last == 1:
+                row, col = row - 1, col + 1
+                last = 0
+
+            # Reached top, switch downwards
+            if row < 0:
+                row, col, last, up_direction = row + 1, col - 2, 0, False
+
+        else:
+            if last == 0:
+                row, col = row, col - 1
+                last = 1
+            elif last == 1:
+                row, col = row + 1, col + 1
+                last = 0
+
+            # Reached end
+            if row == self.size:
+                row, col, last, up_direction = row - 1, col - 2, 0, True
+
+        if col == 6:
+            col -= 1
+
+        return row, col, last, up_direction
+
 
 
 # Step 6: Data Masking
