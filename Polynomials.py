@@ -90,9 +90,12 @@ def divide_once(dividend, divisor):
 
     # Multiply factor and convert to int
     for i, c in enumerate(divisor):
-        e  = c + factor
-        e = e % 255
-        divisor[i] = Tables.antilog[e]
+        if c is None:
+            divisor[i] = 0
+        else:
+            e  = c + factor
+            e = e % 255
+            divisor[i] = Tables.antilog[e]
 
     dividend = to_int(dividend)
 

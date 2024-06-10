@@ -1,6 +1,7 @@
 from Tables import Tables
 from Polynomials import Polynomial, to_exp
 from Patterns import Patterns
+from copy import deepcopy
 
 
 class Message:
@@ -15,6 +16,7 @@ class Message:
         self.final = []
         self.size = 0
         self.matrix = []
+        self.data_matrix = []
 
     #
     # Step 1: Data Analysis
@@ -267,6 +269,7 @@ class Message:
     def create_matrix(self):
         self.size = ((self.version - 1) * 4) + 21
         self.matrix = [[None for _ in range(self.size)] for _ in range(self.size)]
+        self.data_matrix = [[None for _ in range(self.size)] for _ in range(self.size)]
 
     def add_finder_patterns(self):
         self.place_finder(0)
@@ -357,6 +360,7 @@ class Message:
             while self.matrix[i][j] is not None:
                 i, j, last, up_direction = self.find_next(i, j, last, up_direction)
             self.matrix[i][j] = int(bit)
+            self.data_matrix[i][j] = int(bit)
 
     def find_next(self, row, col, last, up_direction):
         if up_direction:
@@ -388,9 +392,116 @@ class Message:
 
         return row, col, last, up_direction
 
+    #
+    # Step 6: Data Masking
+    #
+    def mask_data(self):
+        scores = []
+        for i in range(8):
+            scores.append(self.mask_and_score(0))
+
+    def mask_and_score(self, mask_num):
+        data = deepcopy(self.data_matrix)
+        match mask_num:
+            case 0:
+                for i, row in enumerate(data):
+                    for j, col in enumerate(data):
+                        if col is None:
+                            continue
+                        if (i + j) % 2 == 0:
+                            data[i][j] = col ^ 1
+            case 1:
+                for i, row in enumerate(data):
+                    for j, col in enumerate(data[i]):
+                        if col is None:
+                            continue
+                        if i % 2 == 0:
+                            data[i][j] = col ^ 1
+            case 2:
+                for i, row in enumerate(data):
+                    for j, col in enumerate(data[i]):
+                        if col is None:
+                            continue
+                        if j % 3 == 0:
+                            data[i][j] = col ^ 1
+            case 3:
+                for i, row in enumerate(data):
+                    for j, col in enumerate(data[i]):
+                        if col is None:
+                            continue
+                        if (i + j) % 3 == 0:
+                            data[i][j] = col ^ 1
+            case 4:
+                for i, row in enumerate(data):
+                    for j, col in enumerate(data[i]):
+                        if col is None:
+                            continue
+                        if ((i // 2) + (j // 3)) % 2 == 0:
+                            data[i][j] = col ^ 1
+            case 5:
+                for i, row in enumerate(data):
+                    for j, col in enumerate(data[i]):
+                        if col is None:
+                            continue
+                        if ((i * j) % 2) + ((i * j) % 3) == 0:
+                            data[i][j] = col ^ 1
+            case 6:
+                for i, row in enumerate(data):
+                    for j, col in enumerate(data[i]):
+                        if col is None:
+                            continue
+                        if (((i * j) % 2) + ((i * j) % 3)) % 2 == 0:
+                            data[i][j] = col ^ 1
+            case 7:
+                for i, row in enumerate(data):
+                    for j, col in enumerate(data[i]):
+                        if col is None:
+                            continue
+                        if (((i + j) % 2) + ((i * j) % 3)) % 2 == 0:
+                            data[i][j] = col ^ 1
+
+        matrix = deepcopy(self.matrix)
+        for i, row in enumerate(data):
+            for j, col in enumerate(data[i]):
+                if col is not None:
+                    matrix[i][j] = col
+
+        matrix = self.add_format_bits(matrix, mask_num)
+        return score(matrix)
+
+    def add_format_bits(self, m, mask_num):
+        ec_level = {"L": 0, "M": 1, "Q": 2, "H": 3}.get(self.level)
+        format_string = Tables.format_strings[mask_num][ec_level]
+
+        # Horizontal Format string
+        for i in range(15):
+            if i <= 6:
+                m[8][i] = format_string[i]
+                m[self.size - 1 - i][8] = format_string[i]
+            else:
+                m[8][self.size - 15 + i] = format_string[i]
+                m[14 - i][8] = format_string[i]
+
+        # Version string
+        if self.version >= 7:
+            version_string = Tables.version_strings[self.version - 7]
+
+            for i in range(0, 6):
+                end = self.size - 9
+                m[i][end - 2] = version_string[i // 3]
+                m[i][end - 1] = version_string[(i // 3) + 1]
+                m[i][end] = version_string[(i // 3) + 2]
+
+                m[end - 2][i] = version_string[i // 3]
+                m[end - 1][i] = version_string[(i // 3) + 1]
+                m[end][i] = version_string[(i // 3) + 2]
+
+        return m
 
 
-# Step 6: Data Masking
+
+
+
 
 # Step 7: Format and Version Information
 
