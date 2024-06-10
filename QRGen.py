@@ -7,9 +7,10 @@ from PIL import Image
 
 
 class Message:
-    def __init__(self, plaintext, level="L"):
+    def __init__(self, plaintext, level="L", filename="code"):
         self.plaintext = plaintext
         self.mode = ""
+        self.filename = filename + ".png"
         self.level = level
         self.version = 0
         self.bits = ""
@@ -19,6 +20,7 @@ class Message:
         self.size = 0
         self.matrix = []
         self.data_matrix = []
+        self.create_qr_code()
     
     def create_qr_code(self):
         self.analyze()
@@ -551,5 +553,4 @@ class Message:
             for j in range(side):
                 pixels[j, i] = self.matrix[i][j] ^ 1
         
-        image.show()
-        image.save("examples/code.png")
+        image.save("images/" + self.filename)
