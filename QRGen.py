@@ -397,16 +397,22 @@ class Message:
     # Step 6: Data Masking
     #
     def mask_data(self):
-        scores = []
+        scores = {}
         for i in range(8):
-            scores.append(self.mask_and_score(0))
+            scores[i] = self.mask_and_score(i)
+        best_mask = min(scores, key=scores.get)
+        self.matrix = self.mask(best_mask)
 
     def mask_and_score(self, mask_num):
+        matrix = self.mask(mask_num)
+        return score(matrix)
+
+    def mask(self, mask_num):
         data = deepcopy(self.data_matrix)
         match mask_num:
             case 0:
                 for i, row in enumerate(data):
-                    for j, col in enumerate(data):
+                    for j, col in enumerate(data[i]):
                         if col is None:
                             continue
                         if (i + j) % 2 == 0:
@@ -460,6 +466,8 @@ class Message:
                             continue
                         if (((i + j) % 2) + ((i * j) % 3)) % 2 == 0:
                             data[i][j] = col ^ 1
+            case _:
+                raise Exception("Mask Number must be in range(0,8)")
 
         matrix = deepcopy(self.matrix)
         for i, row in enumerate(data):
@@ -468,20 +476,30 @@ class Message:
                     matrix[i][j] = col
 
         matrix = self.add_format_bits(matrix, mask_num)
-        return score(matrix)
+        return matrix
 
+    #
+    # Step 7: Format and Version Information
+    #
     def add_format_bits(self, m, mask_num):
         ec_level = {"L": 0, "M": 1, "Q": 2, "H": 3}.get(self.level)
         format_string = Tables.format_strings[mask_num][ec_level]
 
         # Horizontal Format string
         for i in range(15):
+            num = eval(format_string[i])
             if i <= 6:
-                m[8][i] = format_string[i]
-                m[self.size - 1 - i][8] = format_string[i]
+                if i == 6:
+                    m[8][i + 1] = num
+                else:
+                    m[8][i] = num
+                m[self.size - 1 - i][8] = num
             else:
-                m[8][self.size - 15 + i] = format_string[i]
-                m[14 - i][8] = format_string[i]
+                m[8][self.size - 15 + i] = num
+                if i <= 8:
+                    m[14 - i + 1][8] = num
+                else:
+                    m[14 - i][8] = num
 
         # Version string
         if self.version >= 7:
@@ -499,4 +517,9 @@ class Message:
 
         return m
 
-# Step 7: Format and Version Information
+    def finalize_code(self):
+        matrix = [[0 for _ in range(self.size + 8)] for _ in range(self.size + 8)]
+        for i in range(self.size):
+            for j in range(self.size):
+                matrix[i + 4][j + 4] = self.matrix[i][j]
+        self.matrix = matrix

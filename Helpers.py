@@ -131,8 +131,8 @@ def cond3(matrix):
             string_x = ""
             string_y = ""
             for k in range(11):
-                string_x += matrix[i][j + k]
-                string_y += matrix[j + k][i]
+                string_x += str(matrix[i][j + k])
+                string_y += str(matrix[j + k][i])
             if string_x == patterns[0] or string_x == patterns[1]:
                 total += 40
             if string_y == patterns[0] or string_y == patterns[1]:
@@ -168,9 +168,9 @@ def format_print_qr(matrix):
             if col is None:
                 print("_", end="")
             elif col == 1:
-                print("□", end="")
+                print("⬛ ", end="")
             elif col == 2:
                 print("r", end="")
             else:
-                print("■", end="")
+                print("██", end="")
         print("")
