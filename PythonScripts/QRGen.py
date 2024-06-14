@@ -21,7 +21,7 @@ class Message:
         self.matrix = []
         self.data_matrix = []
         self.create_qr_code()
-    
+
     def create_qr_code(self):
         self.analyze()
         self.encode()
@@ -30,7 +30,6 @@ class Message:
         self.module_placement()
         self.mask_data()
         self.finalize_code()
-        self.create_image()
         format_print_qr(self.matrix)
 
     #
@@ -538,20 +537,19 @@ class Message:
             for j in range(self.size):
                 matrix[i + 4][j + 4] = self.matrix[i][j]
         self.matrix = matrix
-        
-    
+
     #
     # 8: Create Image File
     #
     def create_image(self):
         side = self.size + 8
         image = Image.new('1', (side, side))
-        
+
         pixels = image.load()
-        
+
         for i in range(side):
             for j in range(side):
                 pixels[j, i] = self.matrix[i][j] ^ 1
-        
+
         image = image.resize((1024, 1024), Image.LANCZOS)
-        image.save("images/" + self.filename)
+        image.save("../images/" + self.filename)
