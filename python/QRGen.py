@@ -9,7 +9,7 @@ import base64
 
 
 class Message:
-    def __init__(self, plaintext, level="L", filename="code", print="False"):
+    def __init__(self, plaintext, level="L", filename="code", print_to_console="False"):
         self.plaintext = plaintext
         self.mode = ""
         self.filename = filename + ".png"
@@ -22,7 +22,7 @@ class Message:
         self.size = 0
         self.matrix = []
         self.data_matrix = []
-        self.print = print
+        self.print_to_console = print_to_console
         self.create_qr_code()
         
 
@@ -34,7 +34,8 @@ class Message:
         self.module_placement()
         self.mask_data()
         self.finalize_code()
-        # format_print_qr(self.matrix)
+        if self.print_to_console:
+            format_print_qr(self.matrix)
 
     #
     # Step 1: Data Analysis
@@ -419,6 +420,7 @@ class Message:
             scores[i] = self.mask_and_score(i)
         best_mask = min(scores, key=scores.get)
         self.matrix = self.mask(best_mask)
+        print(best_mask)
 
     def mask_and_score(self, mask_num):
         matrix = self.mask(mask_num)
@@ -545,7 +547,7 @@ class Message:
     #
     # 8: Create Image File
     #
-    def create_image(self, bytes=False):
+    def create_image(self):
         side = self.size + 8
         image = Image.new('1', (side, side))
 
@@ -557,10 +559,4 @@ class Message:
 
         image = image.resize((1024, 1024), Image.LANCZOS)
 
-        if bytes:
-            image_buffer = BytesIO()
-            image.save(image_buffer, format="PNG")
-            base64_encoded_data = base64.b64encode(image_buffer.getvalue()).decode('ascii')
-            return base64_encoded_data
-        else:
-            image.save("../images/" + self.filename)
+        image.save("../images/" + self.filename)

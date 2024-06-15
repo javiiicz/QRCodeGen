@@ -93,7 +93,7 @@ def divide_once(dividend, divisor):
         if c is None:
             divisor[i] = 0
         else:
-            e  = c + factor
+            e = c + factor
             e = e % 255
             divisor[i] = Tables.antilog[e]
 

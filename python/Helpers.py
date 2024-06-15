@@ -138,7 +138,6 @@ def cond3(matrix):
             if string_y == patterns[0] or string_y == patterns[1]:
                 total += 40
     return total
-                
 
 
 def cond4(matrix):
