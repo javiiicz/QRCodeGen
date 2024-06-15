@@ -183,8 +183,11 @@ logs
 **/*.backup.*
 **/*.back.*
 
-node_modules
+*/node_modules
 bower_components
+
+# eslint cache
+.eslintcache
 
 *.sublime*
 
