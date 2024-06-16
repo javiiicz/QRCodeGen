@@ -1,17 +1,17 @@
 {
   "files": {
-    "main.css": "/QRCodeGen/static/css/main.60e3b34d.css",
-    "main.js": "/QRCodeGen/static/js/main.6fbacbe0.js",
+    "main.css": "/QRCodeGen/static/css/main.d7c2f29b.css",
+    "main.js": "/QRCodeGen/static/js/main.66c005fa.js",
     "static/js/453.5d1c6f6b.chunk.js": "/QRCodeGen/static/js/453.5d1c6f6b.chunk.js",
     "static/media/GitHub-Logo.svg": "/QRCodeGen/static/media/GitHub-Logo.197212f02efa31cf1fd6.svg",
     "index.html": "/QRCodeGen/index.html",
     "static/media/LinkedIn-Logo.svg": "/QRCodeGen/static/media/LinkedIn-Logo.27a3f479ca1bbb0ceef1.svg",
-    "main.60e3b34d.css.map": "/QRCodeGen/static/css/main.60e3b34d.css.map",
-    "main.6fbacbe0.js.map": "/QRCodeGen/static/js/main.6fbacbe0.js.map",
+    "main.d7c2f29b.css.map": "/QRCodeGen/static/css/main.d7c2f29b.css.map",
+    "main.66c005fa.js.map": "/QRCodeGen/static/js/main.66c005fa.js.map",
     "453.5d1c6f6b.chunk.js.map": "/QRCodeGen/static/js/453.5d1c6f6b.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.60e3b34d.css",
-    "static/js/main.6fbacbe0.js"
+    "static/css/main.d7c2f29b.css",
+    "static/js/main.66c005fa.js"
   ]
 }
