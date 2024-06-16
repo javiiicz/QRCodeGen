@@ -51,8 +51,8 @@ function QRCodeGen() {
                     correction level. Then, click the generate button to obtain your
                     QR code.</p>
 
-                <div className="grid lg:grid-cols-2 lg:grid-rows-1 grid-rows-2 grid-cols-1 py-4 items-center">
-                    <div className="flex flex-col items-center gap-10">
+                <div className="lg:grid lg:grid-cols-2 lg:grid-rows-1 flex flex-col py-4 items-stretch gap-5">
+                    <div className="flex flex-col items-center gap-10 ">
                         <div className="md:w-[80%] w-full">
                             <p className="font-bold">Text String:</p>
                             <textarea
@@ -93,9 +93,9 @@ function QRCodeGen() {
                     </div>
 
 
-                    <div className="max-w-96 max-h-96 mx-auto my-10">
+                    <div className="h-48 w-48 sm:h-72 sm:w-72 lg:h-80 lg:w-80 m-auto sm:my-10 flex items-stretch">
                         {!qrCodeImage && (
-                            <div className="w-full h-full bg-gray-300 rounded-xl"/>
+                            <div className="h-full w-full bg-gray-300 rounded-xl grow-1"/>
                         )}
 
                         {qrCodeImage && (
