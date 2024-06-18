@@ -26,7 +26,7 @@ function QRCodeGen() {
 
     return (
         <div className="relative px-[10%] py-10">
-            <h1 className="font-black text-4xl pb-5 relative z-10">QR Code Generator</h1>
+            <h1 className="font-black text-4xl pb-5 relative z-10 drop-shadow">QR Code Generator</h1>
 
             <p className="font-semibold">This QR Code generator was originally coded in Python and then ported to
                 JavaScript. It was made
