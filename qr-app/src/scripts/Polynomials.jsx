@@ -1,4 +1,4 @@
-import { Tables } from './Tables.js';
+import { Tables } from './Tables.jsx';
 
 class Polynomial {
     // i in represents a exponent in x^[len - i - 1]

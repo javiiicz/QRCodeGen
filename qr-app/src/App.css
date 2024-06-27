@@ -1,3 +1,7 @@
 body {
-    font-family: Plus Jakarta Sans, sans-serif;
+  font-family: Plus Jakarta Sans, sans-serif;
+}
+
+main {
+  min-height: calc(100vh - 160px);
 }

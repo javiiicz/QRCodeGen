@@ -1,7 +1,7 @@
-import {Tables} from './Tables.js';
-import {Polynomial, toExp} from './Polynomials.js';
-import {Patterns} from './Patterns.js';
-import * as helper from './Helpers.js';
+import {Tables} from './Tables.jsx';
+import {Polynomial, toExp} from './Polynomials.jsx';
+import {Patterns} from './Patterns.jsx';
+import * as helper from './Helpers.jsx';
 
 export class Message {
     constructor(plaintext, level = "L") {
@@ -486,7 +486,6 @@ export class Message {
         }
         let bestMask = scores.indexOf(Math.min(...scores));
         this.matrix = this.mask(bestMask);
-        console.log(bestMask)
     }
 
     maskAndScore(maskNum) {

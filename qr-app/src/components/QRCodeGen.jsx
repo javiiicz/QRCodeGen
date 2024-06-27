@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Message} from '../scripts/QRGen.js'
+import {Message} from '../scripts/QRGen.jsx'
 
 function QRCodeGen() {
     const [text, setText] = useState('') // Text state
@@ -45,7 +45,7 @@ function QRCodeGen() {
                 </svg>
 
 
-            <div className="m-4 backdrop-blur bg-gray-100/50 md:px-10 px-8 py-2 shadow-glass rounded-xl">
+            <div className="m-4 backdrop-blur bg-gray-100/50 md:px-10 px-8 py-4 shadow-glass rounded-xl mt-10">
 
                 <p className="font-medium py-2">Write the message to be encoded in the text box and select the error
                     correction level. Then, click the generate button to obtain your
